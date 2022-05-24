@@ -62,7 +62,7 @@
               {% endwith %}
               {% if short %}
                 <h5 class="text-center">Ваша короткая ссылка готова:</h5>
-                <a href="{{ url_for('redirect_view', short=short, _external=True) }}">{{ url_for('redirect_view', short=short, _external=True) }}</a>
+                <a href="{{ url_for('redirect_view', short_id=short, _external=True) }}">{{ url_for('redirect_view', short_id=short, _external=True) }}</a>
               {% endif %}
             </p>
           </div>

@@ -1,5 +1,3 @@
-import random
-import string
 from http import HTTPStatus
 
 from flask import abort, flash, redirect, render_template
@@ -7,41 +5,34 @@ from flask import abort, flash, redirect, render_template
 from yacut import app, db
 from yacut.forms import URLForm
 from yacut.models import URL_map
-
-
-def get_unique_short_id():
-    characters = string.ascii_letters + string.digits
-    short_id = ''.join(random.choice(characters) for _ in range(6))
-    if URL_map.query.filter_by(short=short_id).first():
-        short_id = get_unique_short_id()
-    return short_id
+from yacut.utils import get_unique_short_id
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
     form = URLForm()
     if form.validate_on_submit():
-        custom_url = form.custom_id.data
-        if URL_map.query.filter_by(short=custom_url).first():
-            flash('Такой вариант ссылки уже занят!')
+        short_id = form.custom_id.data
+        if URL_map.query.filter_by(short=short_id).first():
+            flash(f'Имя {short_id} уже занято!')
             return render_template('index.html', form=form)
-        if custom_url == '':
-            custom_url = get_unique_short_id()
+        if short_id is None or short_id == '':
+            short_id = get_unique_short_id()
         url = URL_map(
             original=form.original_link.data,
-            short=custom_url,
+            short=short_id,
         )
         db.session.add(url)
         db.session.commit()
         return render_template(
-            'index.html', form=form, short=custom_url
+            'index.html', form=form, short=short_id
         ), HTTPStatus.OK
     return render_template('index.html', form=form)
 
 
-@app.route('/<string:short>')
-def redirect_view(short):
-    redirect_url = URL_map.query.filter_by(short=short).first()
+@app.route('/<string:short_id>')
+def redirect_view(short_id):
+    redirect_url = URL_map.query.filter_by(short=short_id).first()
     if redirect_url is None:
         abort(HTTPStatus.NOT_FOUND)
     return redirect(redirect_url.original)
