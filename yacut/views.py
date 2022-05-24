@@ -18,14 +18,14 @@ def get_unique_short_id():
 
 
 @app.route('/', methods=['GET', 'POST'])
-def index():
+def index_view():
     form = URLForm()
     if form.validate_on_submit():
         custom_url = form.custom_id.data
         if URL_map.query.filter_by(short=custom_url).first():
             flash('Такой вариант ссылки уже занят!')
             return render_template('index.html', form=form)
-        if custom_url is None:
+        if custom_url == '':
             custom_url = get_unique_short_id()
         url = URL_map(
             original=form.original_link.data,
