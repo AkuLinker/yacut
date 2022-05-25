@@ -32,7 +32,5 @@ def index_view():
 
 @app.route('/<string:short_id>')
 def redirect_view(short_id):
-    redirect_url = URL_map.query.filter_by(short=short_id).first()
-    if redirect_url is None:
-        abort(HTTPStatus.NOT_FOUND)
+    redirect_url = URL_map.query.filter_by(short=short_id).first_or_404()
     return redirect(redirect_url.original)
